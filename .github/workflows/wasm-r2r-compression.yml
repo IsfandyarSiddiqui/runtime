@@ -1,0 +1,32 @@
+name: Wasm R2R CoreLib baseline
+
+on:
+  push:
+    branches: [original]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  corelib:
+    if: github.repository == 'IsfandyarSiddiqui/runtime'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang cmake cpio libicu-dev libkrb5-dev liblttng-ust-dev libssl-dev lld lldb llvm ninja-build pigz python-is-python3 time
+      - name: Build and measure CoreLib
+        run: bash eng/wasm-r2r-compression/run-corelib.sh
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: wasm-r2r-corelib-${{ github.sha }}
+          path: artifacts/wasm-r2r-compression/
+          if-no-files-found: warn
+          retention-days: 14
