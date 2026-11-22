@@ -6,13 +6,13 @@ set -euo pipefail
 
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 results=artifacts/wasm-r2r-compression
-test_tree=readytorun/fieldlayout
+test_tree=readytorun/ModuleInitializer
 test_output=artifacts/tests/coreclr/browser.wasm.Release/$test_tree
 mkdir -p "$results"
 rm -f "$results/test-composite-sizes.json" "$results/test-composite-sizes.json.tmp"
 
 # This upstream test always uses composite R2R and its generated script uses Node.js.
-bash src/tests/build.sh -browser -release -coreclr "-test:$test_tree/fieldlayout.csproj" \
+bash src/tests/build.sh -browser -release -coreclr -priority1 "-test:$test_tree/UnsafeAccessorModuleInitializer.csproj" \
     2>&1 | tee "$results/focused-test-build.log"
 bash src/tests/run.sh wasm release --node --runcrossgen2tests "--tree=$test_tree" --verbose \
     2>&1 | tee "$results/focused-test-run.log"

@@ -12,9 +12,9 @@ bash eng/wasm-r2r-compression/run-corelib.sh
 
 The script builds browser-Wasm CoreCLR and its host tools and packs in Release, using the same subset and host flags as the repository's [performance pipeline](../pipelines/performance/templates/perf-wasm-build-jobs.yml). The build's [CoreLib target](../../src/coreclr/crossgen-corelib.proj) emits the R2R image as `artifacts/bin/coreclr/browser.wasm.Release/System.Private.CoreLib.wasm`. The script records the build log, elapsed time, peak RSS, environment, commit SHA, and CoreLib measurements under `artifacts/wasm-r2r-compression/`. Use a fresh build tree for build-cost comparisons.
 
-The script cross-checks the CoreLib table bytes, sentinel, and minimum index against R2RDump. The fork's `Wasm R2R CoreLib baseline` workflow runs the same script on a Linux GitHub-hosted runner when `original` is pushed, provided Actions is enabled. It publishes the measurements and log as a run artifact. The repository's Wasm devcontainer currently prebuilds Mono and requires a separate CoreCLR build for this experiment.
+The script cross-checks the CoreLib table bytes, sentinel, and minimum index against R2RDump. The fork's `Wasm R2R CoreLib baseline` workflow runs the same script on a Linux GitHub-hosted runner when `original` is pushed, provided Actions is enabled. It publishes the CoreLib image, measurements, and logs as a run artifact. The repository's Wasm devcontainer currently prebuilds Mono and requires a separate CoreCLR build for this experiment.
 
-After the CoreCLR build, run the pinned tree's ReadyToRun field-layout test without a browser.
+After the CoreCLR build, run the pinned tree's composite ReadyToRun module initializer tests without a browser.
 
 ```sh
 bash eng/wasm-r2r-compression/run-focused-tests.sh
@@ -36,4 +36,4 @@ node --test eng/wasm-r2r-compression/measure.test.mjs
 
 ## Verification status
 
-The extractor and Brotli round trips pass on synthetic raw Webcil and Wasm-wrapped fixtures. The fixtures also cover truncated input and an incorrect sentinel. A cloud CoreCLR build, real-image validation against R2RDump, representative composite generation, targeted R2R tests, startup/allocation measurements, and runtime timings are pending. Keep default function order for the primary comparisons. This checklist and the runner setup can evolve as the first build exposes additional requirements.
+The extractor and Brotli round trips pass on synthetic raw Webcil and Wasm-wrapped fixtures. The fixtures also cover truncated input and an incorrect sentinel. The [first cloud build](https://github.com/IsfandyarSiddiqui/runtime/actions/runs/45062710173) produced browser-Wasm CoreCLR, the runtime pack, and `System.Private.CoreLib.wasm`. Its post-build script stopped before measuring because it assumed a repo-local SDK. Real-image validation against R2RDump, representative composite generation, targeted R2R tests, startup/allocation measurements, and runtime timings are pending. Keep default function order for the primary comparisons. This checklist and the runner setup can evolve as we validate the tools.

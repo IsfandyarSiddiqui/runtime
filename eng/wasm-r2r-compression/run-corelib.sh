@@ -27,13 +27,13 @@ build=(./build.sh clr+libs+host+packs -os browser -c Release /p:AotHostArchitect
 printf '%q ' "${build[@]}" | tee "$results/build.log"
 printf '\n' | tee -a "$results/build.log"
 /usr/bin/time -v "${build[@]}" 2>&1 | tee -a "$results/build.log"
-./.dotnet/dotnet --info >> "$results/environment.txt"
-
 node eng/wasm-r2r-compression/measure.mjs "$image" > "$results/corelib-sizes.json.tmp"
 mv "$results/corelib-sizes.json.tmp" "$results/corelib-sizes.json"
 cat "$results/corelib-sizes.json"
+cp "$image" "$results/System.Private.CoreLib.wasm"
+./dotnet.sh --info >> "$results/environment.txt"
 
-./.dotnet/dotnet "$runtime/R2RDump/R2RDump.dll" --in "$image" --section RuntimeFunctions --raw --sc \
+./dotnet.sh "$runtime/R2RDump/R2RDump.dll" --in "$image" --section RuntimeFunctions --raw --sc \
     > "$results/corelib-r2rdump.txt" 2>&1
 python3 - "$results/corelib-sizes.json" "$results/corelib-r2rdump.txt" <<'PY'
 import hashlib
