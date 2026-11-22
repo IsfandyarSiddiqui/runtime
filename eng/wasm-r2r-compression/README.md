@@ -12,7 +12,15 @@ bash eng/wasm-r2r-compression/run-corelib.sh
 
 The script builds browser-Wasm CoreCLR and its host tools and packs in Release, using the same subset and host flags as the repository's [performance pipeline](../pipelines/performance/templates/perf-wasm-build-jobs.yml). The build's [CoreLib target](../../src/coreclr/crossgen-corelib.proj) emits the R2R image as `artifacts/bin/coreclr/browser.wasm.Release/System.Private.CoreLib.wasm`. The script records the build log, elapsed time, peak RSS, environment, commit SHA, and CoreLib measurements under `artifacts/wasm-r2r-compression/`. Use a fresh build tree for build-cost comparisons.
 
-The fork's `Wasm R2R CoreLib baseline` workflow runs the same script on a Linux GitHub-hosted runner when `original` is pushed, provided Actions is enabled. It publishes the measurements and log as a run artifact. The repository's Wasm devcontainer currently prebuilds Mono and requires a separate CoreCLR build for this experiment.
+The script cross-checks the CoreLib table bytes, sentinel, and minimum index against R2RDump. The fork's `Wasm R2R CoreLib baseline` workflow runs the same script on a Linux GitHub-hosted runner when `original` is pushed, provided Actions is enabled. It publishes the measurements and log as a run artifact. The repository's Wasm devcontainer currently prebuilds Mono and requires a separate CoreCLR build for this experiment.
+
+After the CoreCLR build, run the pinned tree's ReadyToRun field-layout test without a browser.
+
+```sh
+bash eng/wasm-r2r-compression/run-focused-tests.sh
+```
+
+The upstream test compiles a composite and runs it under Node. Treat its output as a smoke-test image. The pinned test runner enables randomized method order, so use a separately generated default-order composite for primary size comparisons.
 
 ## Measure an existing image
 
