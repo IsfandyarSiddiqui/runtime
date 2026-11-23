@@ -1,0 +1,29 @@
+name: Reset Wasm R2R experiment branches
+on:
+  push:
+    branches: [setup]
+    paths: ['.github/workflows/reset-wasm-r2r-children.yml']
+permissions:
+  contents: write
+jobs:
+  reset:
+    if: github.repository == 'IsfandyarSiddiqui/runtime' && github.ref == 'refs/heads/setup'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805da76410c181273ba90b1
+        with:
+          fetch-depth: 3
+      - name: Remove three branch refs after checking history
+        shell: bash
+        run: |
+          set -euo pipefail
+          original=bffbe17522a349eafd3ae86f5bfff89d840bb690
+          earlier=5b260278ca1485e62e9d2baa9ff81c783efbd128
+          git merge-base --is-ancestor "$original" HEAD
+          git merge-base --is-ancestor "$earlier" HEAD
+          git push --atomic \
+            --force-with-lease="refs/heads/original:$original" \
+            --force-with-lease="refs/heads/david:$earlier" \
+            --force-with-lease="refs/heads/isfandyar:$earlier" \
+            origin :refs/heads/original :refs/heads/david :refs/heads/isfandyar
